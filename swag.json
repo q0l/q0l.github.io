@@ -1,0 +1,1236 @@
+{
+  "openapi" : "3.0.0",
+  "info" : {
+    "description" : "Kallist.io base domain",
+    "version" : "1.0.0",
+    "title" : "Kallist.io Domain"
+  },
+  "components" : {
+    "schemas" : {
+      "RessourceReadBaseModel" : {
+        "type" : "object",
+        "required" : [ "id", "resourceUri" ],
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "description" : "Resource id",
+            "format" : "uuid",
+            "example" : "30d010c3-fc96-4fb8-b1c8-e5fc8c4176e9"
+          },
+          "resourceUri" : {
+            "type" : "string",
+            "format" : "uri",
+            "description" : "Resource uri",
+            "example" : "/v1/domain/items/30d010c3-fc96-4fb8-b1c8-e5fc8c4176e9"
+          }
+        }
+      },
+      "RessourceReadAdminModel" : {
+        "type" : "object",
+        "allOf" : [ {
+          "$ref" : "#/components/schemas/RessourceReadBaseModel"
+        } ],
+        "required" : [ "meta", "locked", "disabled", "deleted" ],
+        "properties" : {
+          "meta" : {
+            "type" : "object",
+            "description" : "Metadata",
+            "required" : [ "creationDate", "modificationDate" ],
+            "properties" : {
+              "creationDate" : {
+                "type" : "string",
+                "format" : "date-time",
+                "description" : "Resource creation ISO date",
+                "example" : "2021-01-21T17:32:28Z"
+              },
+              "modificationDate" : {
+                "type" : "string",
+                "format" : "date-time",
+                "description" : "Resource modification ISO date",
+                "example" : "2021-01-21T17:32:28Z"
+              }
+            }
+          },
+          "locked" : {
+            "type" : "boolean",
+            "default" : false,
+            "description" : "Resource lock flag.<br> If the resource is locked, it cannot be updated by any user, even the administrator. Only an admintsrtaor can unlock it.<br> When the resource is an \\\"user\\\" or a \\\"credentials\\\" resource, the related user can no longer log on.",
+            "example" : "{ ... locked: false ... }"
+          },
+          "disabled" : {
+            "type" : "boolean",
+            "default" : false,
+            "description" : "Resource activation flag.<br> If the resource is disabled, it cannot be retrieved or updated by any user, except an administrator.",
+            "example" : "{ ... disabled: false ... }"
+          },
+          "deleted" : {
+            "type" : "boolean",
+            "default" : false,
+            "description" : "Resource deletion flag.<br> If the resource is delete, it cannot be retrieved or updated by any user. An administrator can only retrieve resource.<br> **An administrator can also not reset the deletion flag.**",
+            "example" : "{ ... deleted: false ... }"
+          }
+        }
+      },
+      "CollectionReadBaseModel" : {
+        "type" : "array",
+        "items" : {
+          "$ref" : "#/components/schemas/RessourceReadBaseModel"
+        }
+      },
+      "CollectionReadAdminModel" : {
+        "type" : "array",
+        "items" : {
+          "$ref" : "#/components/schemas/RessourceReadAdminModel"
+        }
+      },
+      "RessourceWriteAdminModel" : {
+        "type" : "object",
+        "properties" : {
+          "locked" : {
+            "type" : "boolean",
+            "default" : false,
+            "description" : "Resource lock flag. If the resource is locked, it cannot be updated by any user, even the administrator. Only an admintsrtaor can unlock it. When the resource is an \"user\" or a \"credentials\" resource, the related user can no longer log on.",
+            "example" : "{ ... locked: false ... }"
+          },
+          "disabled" : {
+            "type" : "boolean",
+            "default" : false,
+            "description" : "Resource actication flag. If the resource is disabled, it cannot be retrieved or updated by any user, except an administrator.",
+            "example" : "{ ... disabled: false ... }"
+          },
+          "deleted" : {
+            "type" : "boolean",
+            "default" : false,
+            "description" : "Resource deletion flag.  If the resource is delete, it cannot be retrieved or updated by any user. An administrator can only retrieve resource. An administrator can also not reset the deletion flag.",
+            "example" : "{ ... deleted: false ... }"
+          }
+        }
+      },
+      "ErrorModel" : {
+        "description" : "Generic user error",
+        "type" : "integer",
+        "nullable" : true
+      },
+      "ErrorAdminModel" : {
+        "allOf" : [ {
+          "$ref" : "#/components/schemas/ErrorModel"
+        } ],
+        "description" : "Administrator error",
+        "type" : "object",
+        "required" : [ "id", "code", "message" ],
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "code" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "message" : {
+            "type" : "string"
+          }
+        }
+      },
+      "ErrorDevModel" : {
+        "allOf" : [ {
+          "$ref" : "#/components/schemas/ErrorAdminModel"
+        } ],
+        "description" : "Developer error",
+        "required" : [ "id", "code", "message" ],
+        "properties" : {
+          "debug" : {
+            "type" : "object",
+            "properties" : {
+              "logs" : {
+                "type" : "string"
+              }
+            }
+          }
+        }
+      },
+      "AddressModel" : {
+        "description" : "Genric address",
+        "properties" : {
+          "type" : {
+            "description" : "Address type",
+            "type" : "string",
+            "example" : "HQ"
+          },
+          "number" : {
+            "description" : "Address number",
+            "type" : "integer",
+            "example" : "1600"
+          },
+          "repeatIndicator" : {
+            "type" : "string",
+            "enum" : [ "BIS", "TER", "QUATER" ],
+            "example" : "BIS"
+          },
+          "way" : {
+            "description" : "Way type and name",
+            "type" : "string",
+            "example" : "Pennsylvania Avenue NW"
+          },
+          "complement1" : {
+            "description" : "Address complement line 1",
+            "type" : "string"
+          },
+          "complement2" : {
+            "description" : "Address complement line 2",
+            "type" : "string"
+          },
+          "complement3" : {
+            "description" : "Address complement line 3",
+            "type" : "string"
+          },
+          "area" : {
+            "description" : "State, department, county...",
+            "type" : "string",
+            "example" : "Washington, D.C."
+          },
+          "town" : {
+            "description" : "Town name",
+            "type" : "string",
+            "example" : "Washington"
+          },
+          "zipcode" : {
+            "description" : "Zip code",
+            "type" : "string",
+            "example" : "20500"
+          },
+          "country" : {
+            "description" : "Country",
+            "type" : "string",
+            "example" : "U.S."
+          }
+        }
+      },
+      "PhoneModel" : {
+        "description" : "Generic phone",
+        "properties" : {
+          "type" : {
+            "description" : "Phone type",
+            "type" : "string",
+            "example" : "switchboard"
+          },
+          "country" : {
+            "description" : "Country code indicator",
+            "type" : "string",
+            "example" : "+33"
+          },
+          "number" : {
+            "description" : "Phone number",
+            "type" : "string",
+            "example" : "0611223344"
+          }
+        }
+      },
+      "EmailModel" : {
+        "description" : "Genric email",
+        "properties" : {
+          "type" : {
+            "description" : "Email type",
+            "type" : "string",
+            "example" : "contact"
+          },
+          "address" : {
+            "type" : "string",
+            "format" : "email",
+            "example" : "john.doe@mail.com"
+          }
+        }
+      },
+      "CurrencyModel" : {
+        "description" : "Currency <p>\n  <table>\n    <thead>\n      <tr><th>Code</th><th>Symbol</th><th>Designation</th></tr>\n    </thead>\n    <tbody>\n      <tr><td>USD</td><td>US$</td><td>United States dollar</td></tr>\n      <tr><td>EUR</td><td>€</td><td>Euro</td></tr>\n      <tr><td>JPY</td><td>¥</td><td>Japanese yen</td></tr>\n      <tr><td>GBP</td><td>£</td><td>Pound sterling</td></tr>\n      <tr><td>AUD</td><td>A$</td><td>Australian dollar</td></tr>\n      <tr><td>CAD</td><td>C$</td><td>Canadian dollar</td></tr>\n      <tr><td>CHF</td><td>CHF</td><td>Swiss franc</td></tr>\n      <tr><td>CNY</td><td>元/¥</td><td>Renminbi</td></tr>\n      <tr><td>HKD</td><td>HK$</td><td>Hong Kong dollar</td></tr>\n      <tr><td>NZD</td><td>NZ$</td><td>New Zealand dollar</td></tr>\n      <tr><td>SEK</td><td>kr</td><td>Swedish krona</td></tr>\n      <tr><td>KRW</td><td>₩</td><td>South Korean won</td></tr>\n      <tr><td>SGD</td><td>S$</td><td>Singapore dollar</td></tr>\n      <tr><td>NOK</td><td>kr</td><td>Norwegian krone</td></tr>\n      <tr><td>MXN</td><td>$</td><td>Mexican peso</td></tr>\n      <tr><td>INR</td><td>₹</td><td>Indian rupee</td></tr>\n      <tr><td>RUB</td><td>₽</td><td>Russian ruble</td></tr>\n      <tr><td>ZAR</td><td>R</td><td>South African rand</td></tr>\n      <tr><td>TRY</td><td>₺</td><td>Turkish lira</td></tr>\n      <tr><td>BRL</td><td>R$</td><td>Brazilian real</td></tr>\n      <tr><td>TWD</td><td>NT$</td><td>New Taiwan dollar</td></tr>\n      <tr><td>DKK</td><td>kr</td><td>Danish krone</td></tr>\n      <tr><td>PLN</td><td>zł</td><td>Polish złoty</td></tr>\n      <tr><td>THB</td><td>฿</td><td>Thai baht</td></tr>\n      <tr><td>IDR</td><td>Rp</td><td>Indonesian rupiah</td></tr>\n      <tr><td>HUF</td><td>Ft</td><td>Hungarian forint</td></tr>\n      <tr><td>CZK</td><td>Kč</td><td>Czech koruna</td></tr>\n      <tr><td>ILS</td><td>₪</td><td>Israeli new shekel</td></tr>\n      <tr><td>CLP</td><td>CLP$</td><td>Chilean peso</td></tr>\n      <tr><td>PHP</td><td>₱</td><td>Philippine peso</td></tr>\n      <tr><td>AED</td><td>د.إ</td><td>UAE dirham</td></tr>\n      <tr><td>COP</td><td>COL$</td><td>Colombian peso</td></tr>\n      <tr><td>SAR</td><td>﷼</td><td>Saudi riyal</td></tr>\n      <tr><td>MYR</td><td>RM</td><td>Malaysian ringgit</td></tr>\n      <tr><td>RON</td><td>L</td><td>Romanian leu</td></tr>\n    <tbody>\n  </table>\n</p>",
+        "type" : "string",
+        "enum" : [ "USD", "EUR", "JPY", "GBP", "AUD", "CAD", "CHF", "CNY", "HKD", "NZD", "SEK", "KRW", "SGD", "NOK", "MXN", "INR", "RUB", "ZAR", "TRY", "BRL", "TWD", "DKK", "PLN", "THB", "IDR", "HUF", "CZK", "ILS", "CLP", "PHP", "AED", "COP", "SAR", "MYR", "RON" ],
+        "example" : "EUR"
+      },
+      "LanguageModel" : {
+        "description" : "Language <p>\n  <table>\n    <thead>\n      <tr><td>Tag  </th><th>Family</th><th>Language variant</th></tr>\n    </thead>\n    <tbody>\n      <tr><td>ar-DZ</td><td>Arabic</td><td>Algerian Arabic</td></tr>\n      <tr><td>ar-EG</td><td>Arabic</td><td>Egyptian Arabic</td></tr>\n      <tr><td>ar-IQ</td><td>Arabic</td><td>Arabic (Iraq)</td></tr>\n      <tr><td>ar-MA</td><td>Arabic</td><td>Moroccan Arabic</td></tr>\n      <tr><td>ar-SA</td><td>Arabic</td><td>Saudi Arabian Arabic</td></tr>\n      <tr><td>ar-AE</td><td>Arabic</td><td>Arabic (United Arab Emirates)</td></tr>\n      <tr><td>bn-BD</td><td>Bangla</td><td>Bangla (Bangladesh)</td></tr>\n      <tr><td>bn-IN</td><td>Bangla</td><td>Bangla (India)</td></tr>\n      <tr><td>zh-CN</td><td>Chinese</td><td>Mainland China, simplified characters</td></tr>\n      <tr><td>zh-TW</td><td>Chinese</td><td>Taiwan, traditional characters</td></tr>\n      <tr><td>zh-HK</td><td>Chinese</td><td>Hong Kong, traditional characters</td></tr>\n      <tr><td>nl-BE</td><td>Dutch</td><td>Belgian Dutch (aka Flemish)</td></tr>\n      <tr><td>nl-NL</td><td>Dutch</td><td>Standard Dutch (as spoken in The Netherlands)</td></tr>\n      <tr><td>en-GB</td><td>English</td><td>British English</td></tr>\n      <tr><td>en-US</td><td>English</td><td>American English</td></tr>\n      <tr><td>en-CA</td><td>English</td><td>Canadian English</td></tr>\n      <tr><td>en-IN</td><td>English</td><td>Indian English</td></tr>\n      <tr><td>en-AU</td><td>English</td><td>Australian English</td></tr>\n      <tr><td>en-NZ</td><td>English</td><td>New Zealand English</td></tr>\n      <tr><td>en-ZA</td><td>English</td><td>South African English</td></tr>\n      <tr><td>fr-BE</td><td>French</td><td>Belgian French</td></tr>\n      <tr><td>fr-CH</td><td>French</td><td>Swiss French</td></tr>\n      <tr><td>fr-FR</td><td>French</td><td>Standard French (especially in France)</td></tr>\n      <tr><td>fr-CA</td><td>French</td><td>Canadian French</td></tr>\n      <tr><td>fr-LU</td><td>French</td><td>Luxembourgish French</td></tr>\n      <tr><td>de-AT</td><td>German</td><td>Austrian German</td></tr>\n      <tr><td>de-DE</td><td>German</td><td>Standard German (as spoken in Germany)</td></tr>\n      <tr><td>de-CH</td><td>German</td><td>Swiss German</td></tr>\n      <tr><td>it-CH</td><td>Italian</td><td>Swiss Italian</td></tr>\n      <tr><td>it-IT</td><td>Italian</td><td>Standard Italian (as spoken in Italy)</td></tr>\n      <tr><td>ko-KR</td><td>Korean</td><td>Hangul, Korean</td></tr>\n      <tr><td>pt-PT</td><td>Portuguese</td><td>European Portuguese (as written and spoken in Portugal)</td></tr>\n      <tr><td>pt-BR</td><td>Portuguese</td><td>Brazilian Portuguese</td></tr>\n      <tr><td>pt-AO</td><td>Portuguese</td><td>Angolan Portuguese</td></tr>\n      <tr><td>pt-MZ</td><td>Portuguese</td><td>Mozambican Portuguese</td></tr>\n      <tr><td>es-ES</td><td>Spanish</td><td>Castilian Spanish (as spoken in Central-Northern Spain)</td></tr>\n      <tr><td>es-MX</td><td>Spanish</td><td>Mexican Spanish</td></tr>\n      <tr><td>es-AR</td><td>Spanish</td><td>Argentine Spanish</td></tr>\n      <tr><td>es-CO</td><td>Spanish</td><td>Colombian Spanish</td></tr>\n      <tr><td>es-CL</td><td>Spanish</td><td>Chilean Spanish</td></tr>\n      <tr><td>es-PE</td><td>Spanish</td><td>Peruvian Spanish</td></tr>\n      <tr><td>es-VE</td><td>Spanish</td><td>Venezuelan Spanish</td></tr>\n      <tr><td>es-DO</td><td>Spanish</td><td>Dominican Spanish</td></tr>\n      <tr><td>sv-FI</td><td>Swedish</td><td>Finland Swedish</td></tr>\n      <tr><td>sv-SE</td><td>Swedish</td><td>Standard Swedish (as spoken in Sweden)</td></tr>\n      <tr><td>ta-IN</td><td>Tamil</td><td>Indian Tamil</td></tr>\n      <tr><td>ta-LK</td><td>Tamil</td><td>Sri Lankan Tamil</td></tr>\n      <tr><td>zgh-MA</td><td>Tamazight</td><td>Standard Moroccan Tamazight</td></tr>\n    </tbody>\n  </table>\n</p>",
+        "type" : "string",
+        "enum" : [ "ar-DZ", "ar-EG", "ar-IQ", "ar-MA", "ar-SA", "ar-AE", "bn-BD", "bn-IN", "zh-CN", "zh-TW", "zh-HK", "nl-BE", "nl-NL", "en-GB", "en-US", "en-CA", "en-IN", "en-AU", "en-NZ", "en-ZA", "fr-BE", "fr-CH", "fr-FR", "fr-CA", "fr-LU", "de-AT", "de-DE", "de-CH", "it-CH", "it-IT", "ko-KR", "pt-PT", "pt-BR", "pt-AO", "pt-MZ", "es-ES", "es-MX", "es-AR", "es-CO", "es-CL", "es-PE", "es-VE", "es-DO", "sv-FI", "sv-SE", "ta-IN", "ta-LK", "zgh-MA" ]
+      },
+      "FirstnameModel" : {
+        "type" : "string",
+        "description" : "User's first name",
+        "pattern" : "^\\w{16}$",
+        "example" : "John"
+      },
+      "LastnameModel" : {
+        "type" : "string",
+        "description" : "User's last name",
+        "pattern" : "^\\w{16}$",
+        "example" : "Doe"
+      },
+      "LoginModel" : {
+        "description" : "User's login",
+        "type" : "string",
+        "pattern" : "^[\\a-zA-Z0-9\\.\\-_]{16}$",
+        "example" : "john.doe"
+      },
+      "PasswordModel" : {
+        "description" : "User's password",
+        "type" : "string",
+        "format" : "password"
+      },
+      "cliend_id" : {
+        "allOf" : [ {
+          "$ref" : "#/components/schemas/LoginModel"
+        } ],
+        "description" : "The *client_id* is a public identifier for apps. Even though it’s public, it’s best that it isn’t guessable by third parties, so many implementations use something like a 32-character hex string. It must also be unique across all clients that the authorization server handles. If the client ID is guessable, it makes it slightly easier to craft phishing attacks against arbitrary applications.\n"
+      },
+      "client_secret" : {
+        "allOf" : [ {
+          "$ref" : "#/components/schemas/PasswordModel"
+        } ],
+        "description" : "The *client_secret* is a secret known only to the application and the authorization server. It must be sufficiently random to not be guessable, which means you should avoid using common UUID libraries which often take into account the timestamp or MAC address of the server generating it. A great way to generate a secure secret is to use a cryptographically-secure library to generate a 256-bit value and converting it to a hexadecimal representation.\n"
+      },
+      "response_type" : {
+        "description" : "Use for OAuth 2.0 device and implicite flow grant.\n- device flow : *device_code*\n- implicte flow : *token*\n",
+        "type" : "string",
+        "enum" : [ "device_code", "token" ],
+        "example" : "device_code"
+      },
+      "grant_type" : {
+        "description" : "Use for OAuth 2.0 device, authorization code, client credentials and password flow grant, and refresh token flow.\n- device flow : *device_code*\n- authorization code flow : *authorization_code*\n- client credentials flow : *client_credentials*\n- password flow : *password*\n- refresh token flow : *refresh_token*\n",
+        "type" : "string",
+        "enum" : [ "device_code", "authorization_code", "client_credentials", "password", "refresh_token" ],
+        "example" : "device_code"
+      },
+      "username" : {
+        "allOf" : [ {
+          "$ref" : "#/components/schemas/LoginModel"
+        } ],
+        "description" : "The user’s username.",
+        "type" : "string",
+        "example" : "john.doe"
+      },
+      "password" : {
+        "allOf" : [ {
+          "$ref" : "#/components/schemas/PasswordModel"
+        } ],
+        "description" : "The user’s password.",
+        "type" : "string"
+      },
+      "scope" : {
+        "description" : "The scope requested by the application. Your service can support different scopes for the client credentials grant. In practice, not many services actually support this. The requested scope must not include additional scopes that were not issued in the original access token. Typically this will not be included in the request, and if omitted, the service should issue an access token with the same scope as was previously issued.\nOne or more space-separated strings indicating which permissions the application is requesting. The specific OAuth API you’re using will define the scopes that it supports.\n",
+        "type" : "string",
+        "example" : "users:read"
+      },
+      "state" : {
+        "description" : "The application generates a random string and includes it in the request. It should then check that the same value is returned after the user authorizes the app. This is used to prevent CSRF attacks.\n",
+        "type" : "string",
+        "format" : "uuid",
+        "example" : "023e00c0-2910-48b6-b901-a6ffd0a89d69"
+      },
+      "code" : {
+        "description" : "This parameter is the authorization code that the client previously received from the authorization server.\n",
+        "type" : "string",
+        "format" : "uuid",
+        "example" : "581635da-6e20-45af-8fb6-86ae005772cc"
+      },
+      "redirect_uri" : {
+        "description" : "If the redirect URI was included in the initial authorization request, the service must require it in the token request as well. The redirect URI in the token request must be an exact match of the redirect URI that was used when generating the authorization code. The service must reject the request otherwise.\n",
+        "type" : "string",
+        "format" : "uri",
+        "example" : "/v1/domain/resources"
+      },
+      "refresh_token" : {
+        "description" : "The refresh token previously issued to the client.\n",
+        "type" : "string",
+        "format" : "uuid",
+        "example" : "7edd34c6-dabd-4e12-a30a-210f26b21374"
+      },
+      "access_token" : {
+        "type" : "string",
+        "example" : "5f005665-b5e3-43cd-af13-1c4fb413c182"
+      },
+      "token_type" : {
+        "type" : "string",
+        "enum" : [ "bearer" ],
+        "example" : "bearer"
+      },
+      "expires_in" : {
+        "type" : "integer",
+        "example" : 3600
+      },
+      "verification_uri" : {
+        "description" : "Use for OAuth 2.0 Device Flow Grant",
+        "type" : "string",
+        "format" : "uri",
+        "example" : "/v1/security/tokens"
+      },
+      "user_code" : {
+        "description" : "Use for OAuth 2.0 Device Flow Grant",
+        "type" : "string",
+        "format" : "uuid",
+        "example" : "ee3243e6-e87a-41cd-81c4-24ea34c51d07"
+      },
+      "device_code" : {
+        "description" : "Use for OAuth 2.0 Device Flow Grant",
+        "type" : "string",
+        "format" : "uuid",
+        "example" : "f951c463-cb9c-46ed-8555-66f8e9909616"
+      },
+      "interval" : {
+        "description" : "Use for OAuth 2.0 Device Flow Grant",
+        "type" : "integer",
+        "minimum" : 1,
+        "example" : 5
+      }
+    },
+    "parameters" : {
+      "id" : {
+        "name" : "id",
+        "in" : "path",
+        "description" : "Resource id",
+        "required" : true,
+        "schema" : {
+          "type" : "string",
+          "format" : "uuid"
+        },
+        "example" : "44c892c7-9399-4078-a224-5eae3ae9c124"
+      },
+      "ascending" : {
+        "name" : "sorta",
+        "in" : "query",
+        "description" : "Sort collection by ascending alphabetical and numerical order. from A to Z, from min to max, from old to recent...",
+        "required" : false,
+        "schema" : {
+          "type" : "string"
+        }
+      },
+      "descending" : {
+        "name" : "sortd",
+        "in" : "query",
+        "description" : "Sort collection by descending alphabetical and numerical order. From Z to A, from max to min, from recent to old...",
+        "required" : false,
+        "schema" : {
+          "type" : "string"
+        }
+      },
+      "filter" : {
+        "name" : "filter",
+        "in" : "query",
+        "description" : "Filter resource attributes",
+        "required" : false,
+        "schema" : {
+          "type" : "string"
+        }
+      },
+      "index" : {
+        "name" : "index",
+        "in" : "path",
+        "description" : "Resource item index",
+        "required" : true,
+        "schema" : {
+          "type" : "integer",
+          "format" : "int32",
+          "minimum" : 0
+        },
+        "example" : "0"
+      },
+      "query" : {
+        "name" : "query",
+        "in" : "query",
+        "description" : "Filter collection by key/value",
+        "required" : false,
+        "schema" : {
+          "type" : "string"
+        }
+      },
+      "search" : {
+        "name" : "search",
+        "in" : "query",
+        "description" : "Search ressource by keywords",
+        "required" : false,
+        "schema" : {
+          "type" : "string"
+        }
+      },
+      "Accept-Charset" : {
+        "name" : "Accept-Charset",
+        "in" : "header",
+        "description" : "Character sets that are acceptable.",
+        "required" : false,
+        "schema" : {
+          "type" : "string"
+        },
+        "example" : "utf-8"
+      },
+      "Accept-Language" : {
+        "name" : "Accept-Language",
+        "in" : "header",
+        "description" : "List of acceptable human languages for response (used for Content negotiation).",
+        "required" : false,
+        "schema" : {
+          "type" : "string"
+        },
+        "example" : "en-US; q=1.0, fr=0.5"
+      },
+      "Access-Control-Request-Method" : {
+        "name" : "Access-Control-Request-Method",
+        "in" : "header",
+        "description" : "Initiates a request for cross-origin resource sharing with Origin.",
+        "schema" : {
+          "type" : "string"
+        },
+        "example" : "GET"
+      },
+      "Access-Control-Request-Headers" : {
+        "name" : "Access-Control-Request-Headers",
+        "in" : "header",
+        "description" : "Initiates a request for cross-origin resource sharing with Origin.",
+        "schema" : {
+          "type" : "string"
+        },
+        "example" : "GET"
+      },
+      "Range" : {
+        "name" : "Range",
+        "in" : "header",
+        "description" : "Request only a subset of a collection.",
+        "schema" : {
+          "type" : "string"
+        },
+        "example" : "resources=500-999"
+      },
+      "X-API-Key" : {
+        "name" : "X-API-Key",
+        "in" : "header",
+        "description" : "API key.",
+        "required" : true,
+        "schema" : {
+          "type" : "string",
+          "format" : "uuid"
+        },
+        "example" : "ca44be3c-8677-4d66-8364-8fad566a9a10"
+      },
+      "cliend_id" : {
+        "schema" : {
+          "$ref" : "#/components/schemas/cliend_id"
+        },
+        "name" : "cliend_id",
+        "in" : "header",
+        "description" : "The *client_id* is a public identifier for apps. Even though it’s public, it’s best that it isn’t guessable by third parties, so many implementations use something like a 32-character hex string. It must also be unique across all clients that the authorization server handles. If the client ID is guessable, it makes it slightly easier to craft phishing attacks against arbitrary applications.\n"
+      },
+      "client_secret" : {
+        "schema" : {
+          "$ref" : "#/components/schemas/client_secret"
+        },
+        "name" : "client_secret",
+        "in" : "header",
+        "description" : "The *client_secret* is a secret known only to the application and the authorization server. It must be sufficiently random to not be guessable, which means you should avoid using common UUID libraries which often take into account the timestamp or MAC address of the server generating it. A great way to generate a secure secret is to use a cryptographically-secure library to generate a 256-bit value and converting it to a hexadecimal representation.\n"
+      }
+    },
+    "requestBodies" : {
+      "NewResource" : {
+        "description" : "A JSON creation object containing item data",
+        "required" : true,
+        "content" : {
+          "application/json" : {
+            "schema" : {
+              "type" : "object"
+            }
+          }
+        }
+      },
+      "CurrentResource" : {
+        "description" : "A JSON update object containing ressource data",
+        "required" : true,
+        "content" : {
+          "application/json" : {
+            "schema" : {
+              "type" : "object"
+            }
+          }
+        }
+      }
+    },
+    "responses" : {
+      "200OK" : {
+        "description" : "Standard response for successful HTTP requests. The actual response will depend on the request method used. In a GET request, the response will contain an entity corresponding to the requested resource. In a POST request, the response will contain an entity describing or containing the result of the action.",
+        "headers" : {
+          "Content-Language" : {
+            "$ref" : "#/components/headers/Content-Language"
+          },
+          "Content-Location" : {
+            "$ref" : "#/components/headers/Content-Location"
+          },
+          "Link" : {
+            "$ref" : "#/components/headers/Link"
+          },
+          "X-Powered-By" : {
+            "$ref" : "#/components/headers/X-Powered-By"
+          }
+        },
+        "content" : {
+          "application/json" : {
+            "schema" : {
+              "oneOf" : [ {
+                "$ref" : "#/components/schemas/RessourceReadBaseModel"
+              }, {
+                "$ref" : "#/components/schemas/RessourceReadAdminModel"
+              } ]
+            }
+          }
+        }
+      },
+      "200FullContent" : {
+        "description" : "Standard response for successful HTTP requests. The actual response will depend on the request method used. In a GET request, the response will contain an entity corresponding to the requested resource. In a POST request, the response will contain an entity describing or containing the result of the action.",
+        "headers" : {
+          "Content-Language" : {
+            "$ref" : "#/components/headers/Content-Language"
+          },
+          "Content-Location" : {
+            "$ref" : "#/components/headers/Content-Location"
+          },
+          "Link" : {
+            "$ref" : "#/components/headers/Link"
+          },
+          "X-Powered-By" : {
+            "$ref" : "#/components/headers/X-Powered-By"
+          }
+        },
+        "content" : {
+          "application/json" : {
+            "schema" : {
+              "oneOf" : [ {
+                "$ref" : "#/components/schemas/CollectionReadBaseModel"
+              }, {
+                "$ref" : "#/components/schemas/CollectionReadAdminModel"
+              } ]
+            }
+          }
+        }
+      },
+      "OPTIONS200OK" : {
+        "description" : "Standard response for successful HTTP requests. The actual response will depend on the request method used. In a GET request, the response will contain an entity corresponding to the requested resource. In a POST request, the response will contain an entity describing or containing the result of the action.",
+        "headers" : {
+          "Allow" : {
+            "$ref" : "#/components/headers/Allow"
+          },
+          "X-Powered-By" : {
+            "$ref" : "#/components/headers/X-Powered-By"
+          }
+        }
+      },
+      "201Created" : {
+        "description" : "The request has been fulfilled, resulting in the creation of a new resource.",
+        "headers" : {
+          "Link" : {
+            "$ref" : "#/components/headers/Link"
+          },
+          "X-Powered-By" : {
+            "$ref" : "#/components/headers/X-Powered-By"
+          }
+        }
+      },
+      "202Accepted" : {
+        "description" : "The request has been accepted for processing, but the processing has not been completed. The request might or might not be eventually acted upon, and may be disallowed when processing occurs.",
+        "headers" : {
+          "Link" : {
+            "$ref" : "#/components/headers/Link"
+          },
+          "X-Powered-By" : {
+            "$ref" : "#/components/headers/X-Powered-By"
+          }
+        }
+      },
+      "204NoContent" : {
+        "description" : "The server successfully processed the request, and is not returning any content.",
+        "headers" : {
+          "Link" : {
+            "$ref" : "#/components/headers/Link"
+          },
+          "X-Powered-By" : {
+            "$ref" : "#/components/headers/X-Powered-By"
+          }
+        }
+      },
+      "206PartialContent" : {
+        "description" : "The server is delivering only part of the collection due to a range header sent by the client. The range header is used by HTTP clients to split a collection retrieving.",
+        "headers" : {
+          "Content-Language" : {
+            "$ref" : "#/components/headers/Content-Language"
+          },
+          "Content-Location" : {
+            "$ref" : "#/components/headers/Content-Location"
+          },
+          "Link" : {
+            "$ref" : "#/components/headers/Link"
+          },
+          "X-Powered-By" : {
+            "$ref" : "#/components/headers/X-Powered-By"
+          }
+        },
+        "content" : {
+          "application/json" : {
+            "schema" : {
+              "oneOf" : [ {
+                "$ref" : "#/components/schemas/CollectionReadBaseModel"
+              }, {
+                "$ref" : "#/components/schemas/CollectionReadAdminModel"
+              } ]
+            }
+          }
+        }
+      },
+      "400BadRequest" : {
+        "description" : "The server cannot or will not process the request due to an apparent client error (e.g., malformed request syntax, size too large, invalid request message framing, or deceptive request routing).",
+        "headers" : {
+          "Content-Language" : {
+            "$ref" : "#/components/headers/Content-Language"
+          },
+          "X-Powered-By" : {
+            "$ref" : "#/components/headers/X-Powered-By"
+          }
+        },
+        "content" : {
+          "application/json" : {
+            "schema" : {
+              "oneOf" : [ {
+                "$ref" : "#/components/schemas/ErrorModel"
+              }, {
+                "$ref" : "#/components/schemas/ErrorAdminModel"
+              }, {
+                "$ref" : "#/components/schemas/ErrorDevModel"
+              } ]
+            }
+          }
+        }
+      },
+      "401Unauthorized" : {
+        "description" : "Similar to 403 Forbidden, but specifically for use when authentication is required and has failed or has not yet been provided. The response must include a WWW-Authenticate header field containing a challenge applicable to the requested resource. See Basic access authentication and Digest access authentication. 401 semantically means \"unauthorised\", the user does not have valid authentication credentials for the target resource.",
+        "headers" : {
+          "Content-Language" : {
+            "$ref" : "#/components/headers/Content-Language"
+          },
+          "WWW-Authenticate" : {
+            "$ref" : "#/components/headers/WWW-Authenticate"
+          },
+          "X-Powered-By" : {
+            "$ref" : "#/components/headers/X-Powered-By"
+          }
+        },
+        "content" : {
+          "application/json" : {
+            "schema" : {
+              "oneOf" : [ {
+                "$ref" : "#/components/schemas/ErrorModel"
+              }, {
+                "$ref" : "#/components/schemas/ErrorAdminModel"
+              }, {
+                "$ref" : "#/components/schemas/ErrorDevModel"
+              } ]
+            }
+          }
+        }
+      },
+      "403Forbidden" : {
+        "description" : "The request contained valid data and was understood by the server, but the server is refusing action. This may be due to the user not having the necessary permissions for a resource or needing an account of some sort, or attempting a prohibited action (e.g. creating a duplicate record where only one is allowed). This code is also typically used if the request provided authentication by answering the WWW-Authenticate header field challenge, but the server did not accept that authentication. The request should not be repeated.",
+        "headers" : {
+          "Content-Language" : {
+            "$ref" : "#/components/headers/Content-Language"
+          },
+          "X-Powered-By" : {
+            "$ref" : "#/components/headers/X-Powered-By"
+          }
+        },
+        "content" : {
+          "application/json" : {
+            "schema" : {
+              "$ref" : "#/components/schemas/ErrorModel"
+            }
+          }
+        }
+      },
+      "404NotFound" : {
+        "description" : "The requested resource could not be found but may be available in the future. Subsequent requests by the client are permissible.",
+        "headers" : {
+          "Content-Language" : {
+            "$ref" : "#/components/headers/Content-Language"
+          },
+          "X-Powered-By" : {
+            "$ref" : "#/components/headers/X-Powered-By"
+          }
+        },
+        "content" : {
+          "application/json" : {
+            "schema" : {
+              "oneOf" : [ {
+                "$ref" : "#/components/schemas/ErrorModel"
+              }, {
+                "$ref" : "#/components/schemas/ErrorAdminModel"
+              }, {
+                "$ref" : "#/components/schemas/ErrorDevModel"
+              } ]
+            }
+          }
+        }
+      },
+      "405MethodNotAllowed" : {
+        "description" : "A request method is not supported for the requested resource; for example, a GET request on a form that requires data to be presented via POST, or a PUT request on a read-only resource.",
+        "headers" : {
+          "Allow" : {
+            "$ref" : "#/components/headers/Allow"
+          },
+          "Content-Language" : {
+            "$ref" : "#/components/headers/Content-Language"
+          },
+          "X-Powered-By" : {
+            "$ref" : "#/components/headers/X-Powered-By"
+          }
+        },
+        "content" : {
+          "application/json" : {
+            "schema" : {
+              "oneOf" : [ {
+                "$ref" : "#/components/schemas/ErrorModel"
+              }, {
+                "$ref" : "#/components/schemas/ErrorAdminModel"
+              }, {
+                "$ref" : "#/components/schemas/ErrorDevModel"
+              } ]
+            }
+          }
+        }
+      },
+      "406NotAcceptable" : {
+        "description" : "The requested resource is capable of generating only content not acceptable according to the Accept headers sent in the request. See Content negotiation.",
+        "headers" : {
+          "Content-Language" : {
+            "$ref" : "#/components/headers/Content-Language"
+          },
+          "X-Powered-By" : {
+            "$ref" : "#/components/headers/X-Powered-By"
+          }
+        },
+        "content" : {
+          "application/json" : {
+            "schema" : {
+              "oneOf" : [ {
+                "$ref" : "#/components/schemas/ErrorModel"
+              }, {
+                "$ref" : "#/components/schemas/ErrorAdminModel"
+              }, {
+                "$ref" : "#/components/schemas/ErrorDevModel"
+              } ]
+            }
+          }
+        }
+      },
+      "409Conflict" : {
+        "description" : "Indicates that the request could not be processed because of conflict in the current state of the resource, such as an edit conflict between multiple simultaneous updates.",
+        "headers" : {
+          "Content-Language" : {
+            "$ref" : "#/components/headers/Content-Language"
+          },
+          "X-Powered-By" : {
+            "$ref" : "#/components/headers/X-Powered-By"
+          }
+        },
+        "content" : {
+          "application/json" : {
+            "schema" : {
+              "oneOf" : [ {
+                "$ref" : "#/components/schemas/ErrorModel"
+              }, {
+                "$ref" : "#/components/schemas/ErrorAdminModel"
+              }, {
+                "$ref" : "#/components/schemas/ErrorDevModel"
+              } ]
+            }
+          }
+        }
+      },
+      "412PreconditionFailed" : {
+        "description" : "The server does not meet one of the preconditions that the requester put on the request header fields.",
+        "headers" : {
+          "Content-Language" : {
+            "$ref" : "#/components/headers/Content-Language"
+          },
+          "X-Powered-By" : {
+            "$ref" : "#/components/headers/X-Powered-By"
+          }
+        },
+        "content" : {
+          "application/json" : {
+            "schema" : {
+              "oneOf" : [ {
+                "$ref" : "#/components/schemas/ErrorModel"
+              }, {
+                "$ref" : "#/components/schemas/ErrorAdminModel"
+              }, {
+                "$ref" : "#/components/schemas/ErrorDevModel"
+              } ]
+            }
+          }
+        }
+      },
+      "415UnsupportedMediaType" : {
+        "description" : "The request entity has a media type which the server or resource does not support. For example, the client uploads an image as image/svg+xml, but the server requires that images use a different format.",
+        "headers" : {
+          "Content-Language" : {
+            "$ref" : "#/components/headers/Content-Language"
+          },
+          "X-Powered-By" : {
+            "$ref" : "#/components/headers/X-Powered-By"
+          }
+        },
+        "content" : {
+          "application/json" : {
+            "schema" : {
+              "oneOf" : [ {
+                "$ref" : "#/components/schemas/ErrorModel"
+              }, {
+                "$ref" : "#/components/schemas/ErrorAdminModel"
+              }, {
+                "$ref" : "#/components/schemas/ErrorDevModel"
+              } ]
+            }
+          }
+        }
+      },
+      "416RangeNotSatisfiable" : {
+        "description" : "The client has asked for a portion of the file (byte serving), but the server cannot supply that portion. For example, if the client asked for a part of the file that lies beyond the end of the file. Called \"Requested Range Not Satisfiable\" previously.",
+        "headers" : {
+          "Content-Language" : {
+            "schema" : {
+              "$ref" : "#/components/headers/Content-Language"
+            }
+          },
+          "X-Powered-By" : {
+            "$ref" : "#/components/headers/X-Powered-By"
+          }
+        },
+        "content" : {
+          "application/json" : {
+            "schema" : {
+              "oneOf" : [ {
+                "$ref" : "#/components/schemas/ErrorModel"
+              }, {
+                "$ref" : "#/components/schemas/ErrorAdminModel"
+              }, {
+                "$ref" : "#/components/schemas/ErrorDevModel"
+              } ]
+            }
+          }
+        }
+      }
+    },
+    "headers" : {
+      "Allow" : {
+        "description" : "Valid methods for a specified resource. To be used with OPTIONS request method or for a 405 (Method not allowed) response.",
+        "schema" : {
+          "type" : "string"
+        }
+      },
+      "Access-Control-Allow-Origin" : {
+        "description" : "Specifying which web sites can participate in cross-origin resource sharing.",
+        "schema" : {
+          "type" : "string"
+        },
+        "example" : "Access-Control-Allow-Origin: **http://www.example.com**"
+      },
+      "Access-Control-Allow-Credentials" : {
+        "description" : "Specifying which web sites can participate in cross-origin resource sharing.",
+        "schema" : {
+          "type" : "string"
+        },
+        "example" : ""
+      },
+      "Access-Control-Expose-Headers" : {
+        "description" : "Specifying which web sites can participate in cross-origin resource sharing.",
+        "schema" : {
+          "type" : "string"
+        },
+        "example" : ""
+      },
+      "Access-Control-Max-Age" : {
+        "description" : "Specifying which web sites can participate in cross-origin resource sharing.",
+        "schema" : {
+          "type" : "string"
+        },
+        "example" : ""
+      },
+      "Access-Control-Allow-Methods" : {
+        "description" : "Specifying which web sites can participate in cross-origin resource sharing.",
+        "schema" : {
+          "type" : "string"
+        },
+        "example" : "Access-Control-Allow-Methods: **PUT, DELETE**"
+      },
+      "Access-Control-Allow-Headers" : {
+        "description" : "Specifying which web sites can participate in cross-origin resource sharing.",
+        "schema" : {
+          "type" : "string"
+        },
+        "example" : ""
+      },
+      "Content-Language" : {
+        "description" : "The natural language or languages of the intended audience for the enclosed content.",
+        "schema" : {
+          "type" : "string"
+        }
+      },
+      "Content-Location" : {
+        "description" : "The location of the returned resource or collection",
+        "schema" : {
+          "type" : "string"
+        }
+      },
+      "Content-Range" : {
+        "description" : "Request only part of a collection.<br> If range has not been defined, the first 20 items of the collection are returned.<br> Equivalent to *\"Range: resources=0-20\"*<br>",
+        "schema" : {
+          "type" : "string"
+        }
+      },
+      "Content-Type" : {
+        "description" : "The MIME type of this content",
+        "schema" : {
+          "type" : "string"
+        }
+      },
+      "Expires" : {
+        "description" : "Gives the date/time after which the response is considered stale (in \"HTTP-date\" format as defined by RFC 7231)",
+        "schema" : {
+          "type" : "string"
+        }
+      },
+      "Last-Modified" : {
+        "description" : "The last modified date for the requested object (in \"HTTP-date\" format as defined by RFC 7231)",
+        "schema" : {
+          "type" : "string"
+        }
+      },
+      "Link" : {
+        "description" : "Serialized links related to the current resource. Links are semantically equivalent to the HTML <link> element.",
+        "required" : false,
+        "schema" : {
+          "type" : "string"
+        },
+        "example" : "</v1/security/tokens/5f005665-b5e3-43cd-af13-1c4fb413c182>;rel=\"signout\";method=\"DELETE\",\n</v1/profiles/users/>;rel=\"users_collection\";method=\"GET\",\n</v1/rpofiles/settings/58e1ad3b-da2d-416c-9744-ccfc243b006c>;rel=\"current_user_settings\";method=\"GET\",\n</v1/security/credentials/bf18c169-b70e-4b33-a615-e37c26412061>;rel=\"current_user_credentials\";method=\"GET\"\n"
+      },
+      "Location" : {
+        "description" : "URI of the new resource which has been created.",
+        "schema" : {
+          "type" : "string"
+        }
+      },
+      "Origin" : {
+        "description" : "Initiates a request for cross-origin resource sharing (asks server for Access-Control-* response fields).",
+        "schema" : {
+          "type" : "string"
+        },
+        "example" : "Origin: http://api.domain.com"
+      },
+      "X-Powered-By" : {
+        "description" : "Platform solution provider.",
+        "schema" : {
+          "type" : "string"
+        },
+        "example" : "Kallist.io 1.0"
+      },
+      "WWW-Authenticate" : {
+        "description" : "Indicates the authentication scheme that should be used to access the requested entity.",
+        "schema" : {
+          "type" : "string"
+        }
+      }
+    },
+    "pathitems" : {
+      "resourceOperations" : {
+        "get" : {
+          "description" : "Returns a resource based on ID",
+          "summary" : "Find resource by ID",
+          "parameters" : [ {
+            "$ref" : "#/components/parameters/id"
+          }, {
+            "$ref" : "#/components/parameters/filter"
+          }, {
+            "$ref" : "#/components/parameters/Accept-Charset"
+          }, {
+            "$ref" : "#/components/parameters/Accept-Language"
+          } ],
+          "responses" : {
+            "200" : {
+              "$ref" : "#/components/responses/200OK"
+            },
+            "400" : {
+              "$ref" : "#/components/responses/400BadRequest"
+            },
+            "401" : {
+              "$ref" : "#/components/responses/401Unauthorized"
+            },
+            "403" : {
+              "$ref" : "#/components/responses/403Forbidden"
+            },
+            "404" : {
+              "$ref" : "#/components/responses/404NotFound"
+            },
+            "406" : {
+              "$ref" : "#/components/responses/406NotAcceptable"
+            },
+            "415" : {
+              "$ref" : "#/components/responses/415UnsupportedMediaType"
+            },
+            "default" : {
+              "$ref" : "#/components/responses/400BadRequest"
+            }
+          }
+        },
+        "patch" : {
+          "description" : "Update a resource based on ID",
+          "summary" : "Modify resource by ID",
+          "parameters" : [ {
+            "$ref" : "#/components/parameters/id"
+          } ],
+          "requestBody" : {
+            "$ref" : "#/components/requestBodies/CurrentResource"
+          },
+          "responses" : {
+            "202" : {
+              "$ref" : "#/components/responses/202Accepted"
+            },
+            "400" : {
+              "$ref" : "#/components/responses/400BadRequest"
+            },
+            "401" : {
+              "$ref" : "#/components/responses/401Unauthorized"
+            },
+            "403" : {
+              "$ref" : "#/components/responses/403Forbidden"
+            },
+            "404" : {
+              "$ref" : "#/components/responses/404NotFound"
+            },
+            "412" : {
+              "$ref" : "#/components/responses/412PreconditionFailed"
+            },
+            "default" : {
+              "$ref" : "#/components/responses/400BadRequest"
+            }
+          }
+        },
+        "delete" : {
+          "description" : "Delete a resource based on ID",
+          "summary" : "Remove resource by ID",
+          "parameters" : [ {
+            "$ref" : "#/components/parameters/id"
+          } ],
+          "responses" : {
+            "204" : {
+              "$ref" : "#/components/responses/204NoContent"
+            },
+            "400" : {
+              "$ref" : "#/components/responses/400BadRequest"
+            },
+            "401" : {
+              "$ref" : "#/components/responses/401Unauthorized"
+            },
+            "403" : {
+              "$ref" : "#/components/responses/403Forbidden"
+            },
+            "404" : {
+              "$ref" : "#/components/responses/404NotFound"
+            },
+            "default" : {
+              "$ref" : "#/components/responses/400BadRequest"
+            }
+          }
+        }
+      },
+      "collectionOperations" : {
+        "get" : {
+          "description" : "Returns a collection of resources",
+          "summary" : "List resources",
+          "parameters" : [ {
+            "$ref" : "#/components/parameters/id"
+          }, {
+            "$ref" : "#/components/parameters/ascending"
+          }, {
+            "$ref" : "#/components/parameters/descending"
+          }, {
+            "$ref" : "#/components/parameters/filter"
+          }, {
+            "$ref" : "#/components/parameters/query"
+          }, {
+            "$ref" : "#/components/parameters/search"
+          }, {
+            "$ref" : "#/components/parameters/Accept-Charset"
+          }, {
+            "$ref" : "#/components/parameters/Accept-Language"
+          }, {
+            "$ref" : "#/components/parameters/Range"
+          } ],
+          "responses" : {
+            "200" : {
+              "$ref" : "#/components/responses/200FullContent"
+            },
+            "206" : {
+              "$ref" : "#/components/responses/206PartialContent"
+            },
+            "400" : {
+              "$ref" : "#/components/responses/400BadRequest"
+            },
+            "401" : {
+              "$ref" : "#/components/responses/401Unauthorized"
+            },
+            "403" : {
+              "$ref" : "#/components/responses/403Forbidden"
+            },
+            "416" : {
+              "$ref" : "#/components/responses/416RangeNotSatisfiable"
+            },
+            "default" : {
+              "$ref" : "#/components/responses/400BadRequest"
+            }
+          }
+        },
+        "post" : {
+          "description" : "Create a resource in a collection",
+          "summary" : "Create new resource",
+          "requestBody" : {
+            "$ref" : "#/components/requestBodies/NewResource"
+          },
+          "responses" : {
+            "201" : {
+              "$ref" : "#/components/responses/201Created"
+            },
+            "400" : {
+              "$ref" : "#/components/responses/400BadRequest"
+            },
+            "401" : {
+              "$ref" : "#/components/responses/401Unauthorized"
+            },
+            "403" : {
+              "$ref" : "#/components/responses/403Forbidden"
+            },
+            "409" : {
+              "$ref" : "#/components/responses/409Conflict"
+            },
+            "default" : {
+              "$ref" : "#/components/responses/400BadRequest"
+            }
+          }
+        }
+      }
+    },
+    "examples" : {
+      "tshirt" : {
+        "summary" : "Sample T-shirt data",
+        "value" : {
+          "id" : 17,
+          "name" : "T-shirt",
+          "description" : "100% cotton shirt",
+          "categories" : [ "clothes" ]
+        }
+      }
+    },
+    "links" : { },
+    "callbacks" : { }
+  }
+}
